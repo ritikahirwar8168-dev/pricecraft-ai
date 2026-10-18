@@ -25,6 +25,7 @@ function setupEventListeners() {
   document.getElementById("nav-pricing-btn").addEventListener("click", () => switchView("pricing"));
   document.getElementById("nav-inventory-btn").addEventListener("click", () => switchView("inventory"));
   document.getElementById("nav-telemetry-btn").addEventListener("click", () => switchView("telemetry"));
+  document.getElementById("nav-pipeline-btn").addEventListener("click", () => switchView("pipeline"));
 
   // CSV Export
   const exportBtn = document.getElementById("export-csv-btn");
@@ -104,11 +105,13 @@ function switchView(viewName) {
     pricing: document.getElementById("pricing-view"),
     inventory: document.getElementById("inventory-view"),
     telemetry: document.getElementById("telemetry-view"),
+    pipeline: document.getElementById("pipeline-view"),
   };
   const tabs = {
     pricing: document.getElementById("nav-pricing-btn"),
     inventory: document.getElementById("nav-inventory-btn"),
     telemetry: document.getElementById("nav-telemetry-btn"),
+    pipeline: document.getElementById("nav-pipeline-btn"),
   };
 
   Object.keys(views).forEach((k) => {
