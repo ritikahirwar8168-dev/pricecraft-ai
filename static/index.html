@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceCraft AI - Open-Source Resale Valuation & Listing Engine</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            dark: {
+              900: '#0b0f19',
+              850: '#111827',
+              800: '#1f2937',
+              750: '#283548',
+              700: '#374151',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen antialiased flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-slate-900/70 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="sparkles" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-emerald-400 bg-clip-text text-transparent">
+              PriceCraft <span class="text-emerald-400">AI</span>
+            </span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Side Hustle OS
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Tabular Prior Valuation + Open-Weight Listing Engine</p>
+        </div>
+      </div>
+
+      <!-- Navigation tabs -->
+      <div class="flex items-center space-x-1 sm:space-x-2">
+        <button id="nav-pricing-btn" class="nav-tab active flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+          <i data-lucide="tag" class="w-4 h-4"></i>
+          <span>Appraisal & Listing</span>
+        </button>
+        <button id="nav-inventory-btn" class="nav-tab flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span>Inventory (<span id="inv-count-badge">0</span>)</span>
+        </button>
+        <button id="nav-telemetry-btn" class="nav-tab flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white">
+          <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i>
+          <span class="hidden md:inline">Sentry Telemetry</span>
+          <span class="md:hidden">Traces</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Partner Badges Header -->
+  <div class="border-b border-slate-800/60 bg-slate-950/40 py-2">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center space-x-2 text-slate-400">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-medium">Core Open Stack:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge-partner">
+          <i data-lucide="table" class="w-3.5 h-3.5 text-blue-400"></i> Prior Labs TabPFN-3.5
+        </span>
+        <span class="badge-partner">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400"></i> Google Gemma 2 (Open-Weight)
+        </span>
+        <span class="badge-partner">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-amber-400"></i> SerpApi Live Radar
+        </span>
+        <span class="badge-partner">
+          <i data-lucide="mic" class="w-3.5 h-3.5 text-pink-400"></i> ElevenLabs Voiceover
+        </span>
+        <span class="badge-partner">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-purple-400"></i> Sentry Agent Tracing
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- View 1: Valuation & Listing Engine -->
+    <section id="pricing-view" class="space-y-6">
+
+      <!-- One-Click Presets -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+            <h2 class="text-sm font-semibold text-slate-200">Instant Demo Presets (1-Click Evaluation):</h2>
+          </div>
+          <span class="text-xs text-slate-500">Pick any real sample to populate and analyze instantly</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5" id="presets-container">
+          <!-- Dynamically populated presets -->
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Input Form (5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
+            <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-base text-white flex items-center space-x-2">
+                  <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Item Specifications</span>
+                </h3>
+                <p class="text-xs text-slate-400">Feed tabular features into TabPFN & Gemma 2</p>
+              </div>
+              <button id="clear-form-btn" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                Reset
+              </button>
+            </div>
+
+            <form id="item-form" class="space-y-3.5 text-xs sm:text-sm">
+
+              <!-- Title -->
+              <div>
+                <label class="block font-medium text-slate-300 mb-1">Item Title / Sourced Product</label>
+                <input type="text" id="input-title" required
+                  placeholder="e.g. Vintage 1994 Nike Spellout Windbreaker Jacket"
+                  class="input-field w-full">
+              </div>
+
+              <!-- Brand & Category -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium text-slate-300 mb-1">Brand / Maker</label>
+                  <input type="text" id="input-brand" required placeholder="e.g. Nike, Sony, Seiko"
+                    class="input-field w-full">
+                </div>
+                <div>
+                  <label class="block font-medium text-slate-300 mb-1">Category</label>
+                  <select id="input-category" class="input-field w-full">
+                    <option value="streetwear">Vintage Streetwear</option>
+                    <option value="electronics">Consumer Tech & Retro</option>
+                    <option value="collectibles">Collectibles & Cards</option>
+                    <option value="luxury">Watches & Luxury Goods</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Condition Score Slider -->
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="font-medium text-slate-300">Condition Grade (1 - 10)</label>
+                  <span id="condition-val" class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-xs">8.5 / 10 (Very Good)</span>
+                </div>
+                <input type="range" id="input-condition" min="1" max="10" step="0.5" value="8.5"
+                  class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+                  <span>1.0 (Parts/Flawed)</span>
+                  <span>5.0 (Fair)</span>
+                  <span>8.5 (Very Good)</span>
+                  <span>10.0 (Deadstock/NIB)</span>
+                </div>
+              </div>
+
+              <!-- Purchase Cost & Original Retail -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium text-slate-300 mb-1">Your Sourcing Cost ($)</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-500 font-bold">$</span>
+                    <input type="number" id="input-purchase-cost" step="0.5" min="0" value="15.00"
+                      class="input-field w-full pl-7">
+                  </div>
+                </div>
+                <div>
+                  <label class="block font-medium text-slate-300 mb-1">Original MSRP / Retail ($)</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-500 font-bold">$</span>
+                    <input type="number" id="input-retail-cost" step="1.0" min="5" value="85.00"
+                      class="input-field w-full pl-7">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabular Priors: Brand Tier & Rarity -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="font-medium text-slate-300">Brand Tier</label>
+                    <span id="brand-tier-val" class="text-xs text-slate-400 font-bold">Tier 3 (Hype)</span>
+                  </div>
+                  <input type="range" id="input-brand-tier" min="1" max="4" step="0.5" value="3.0"
+                    class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                </div>
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="font-medium text-slate-300">Rarity Score</label>
+                    <span id="rarity-val" class="text-xs text-slate-400 font-bold">4.0 / 5 (Rare)</span>
+                  </div>
+                  <input type="range" id="input-rarity" min="1" max="5" step="0.5" value="4.0"
+                    class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                </div>
+              </div>
+
+              <!-- Vintage Age & Demand Trend -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium text-slate-300 mb-1">Age / Vintage Era (Years)</label>
+                  <input type="number" id="input-age" min="0" max="80" value="28"
+                    class="input-field w-full">
+                </div>
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="font-medium text-slate-300">Market Demand</label>
+                    <span id="demand-val" class="text-xs text-emerald-400 font-bold">4.5 / 5 (High)</span>
+                  </div>
+                  <input type="range" id="input-demand" min="1" max="5" step="0.5" value="4.5"
+                    class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                </div>
+              </div>
+
+              <!-- Condition Notes & Specifics -->
+              <div>
+                <label class="block font-medium text-slate-300 mb-1">Condition Flaws & Key Specs</label>
+                <textarea id="input-notes" rows="2"
+                  placeholder="e.g. Minor fading on collar tag, all zippers work smoothly, no stains or rips. Size XL."
+                  class="input-field w-full"></textarea>
+              </div>
+
+              <!-- Features / Extras -->
+              <div>
+                <label class="block font-medium text-slate-300 mb-1">Key Selling Points / Accessories</label>
+                <input type="text" id="input-features"
+                  placeholder="e.g. Embroidered logo, colorblock purple/teal, authentic 90s tag"
+                  class="input-field w-full">
+              </div>
+
+              <!-- Shipping Included checkbox -->
+              <div class="flex items-center space-x-2 pt-1">
+                <input type="checkbox" id="input-shipping" checked
+                  class="w-4 h-4 rounded text-emerald-500 bg-slate-800 border-slate-700 focus:ring-emerald-500 focus:ring-offset-slate-900">
+                <label for="input-shipping" class="text-xs text-slate-300 cursor-pointer">
+                  Offer Free Tracked Shipping (boosts algorithm visibility + TabPFN weighting)
+                </label>
+              </div>
+
+              <!-- Submit CTA -->
+              <div class="pt-2">
+                <button type="submit" id="analyze-btn"
+                  class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center space-x-2 active:scale-[0.99]">
+                  <i data-lucide="play" class="w-4 h-4 fill-slate-950 stroke-none"></i>
+                  <span>Run Prior TabPFN & Gemma 2 Valuation</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Column: Results Dashboard (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+
+          <!-- Loading State Indicator -->
+          <div id="loading-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+            <div class="relative w-16 h-16 mx-auto">
+              <div class="w-16 h-16 rounded-full border-4 border-slate-800 border-t-emerald-500 animate-spin"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <i data-lucide="cpu" class="w-6 h-6 text-emerald-400"></i>
+              </div>
+            </div>
+            <div>
+              <h4 class="text-base font-bold text-white" id="loading-step-text">Querying Prior Labs TabPFN-3.5...</h4>
+              <p class="text-xs text-slate-400 mt-1">Executing zero-shot tabular Bayesian regression on historical resale records</p>
+            </div>
+            <div class="max-w-xs mx-auto bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-2/3 animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Empty State (Before First Run) -->
+          <div id="empty-state-card" class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-10 text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto text-emerald-400 border border-slate-700">
+              <i data-lucide="sparkles" class="w-7 h-7"></i>
+            </div>
+            <div class="max-w-md mx-auto">
+              <h3 class="text-lg font-bold text-white">Ready to Appraise & Auto-List</h3>
+              <p class="text-sm text-slate-400 mt-1">
+                Click any preset button above or fill in your item specs to see TabPFN price predictions, live SerpApi market comps, and Google Gemma 2 listing copy.
+              </p>
+            </div>
+            <div class="pt-2">
+              <button onclick="document.querySelector('#presets-container button').click()"
+                class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors inline-flex items-center space-x-2">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Load Sample Nike Vintage Item</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Results Card (Visible upon execution) -->
+          <div id="results-container" class="hidden space-y-5">
+
+            <!-- Card 1: TabPFN Valuation Box -->
+            <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+              <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Prior Labs TabPFN-3.5 Foundation Model</span>
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-slate-400">
+                  <span>Confidence:</span>
+                  <span id="tabpfn-confidence" class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-slate-700">92%</span>
+                </div>
+              </div>
+
+              <!-- Big Pricing Metrics -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
+                <!-- Optimal Price -->
+                <div class="bg-slate-800/70 border border-emerald-500/30 rounded-xl p-3.5 relative">
+                  <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Optimal Sweet Spot</span>
+                  <div class="text-3xl font-extrabold text-white mt-1" id="res-optimal-price">$0.00</div>
+                  <div class="text-[11px] text-slate-400 mt-1 flex items-center space-x-1">
+                    <i data-lucide="clock" class="w-3 h-3 text-emerald-400"></i>
+                    <span>Est. <span id="res-est-days" class="font-semibold text-slate-200">11</span> days to sell</span>
+                  </div>
+                </div>
+
+                <!-- Quick Sale Price -->
+                <div class="bg-slate-800/40 border border-slate-700/60 rounded-xl p-3.5">
+                  <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Liquidate Floor (&lt; 7 Days)</span>
+                  <div class="text-2xl font-bold text-slate-200 mt-1" id="res-quick-price">$0.00</div>
+                  <div class="text-[11px] text-slate-400 mt-1">Instant turn / cash flow</div>
+                </div>
+
+                <!-- Patient Collector Price -->
+                <div class="bg-slate-800/40 border border-slate-700/60 rounded-xl p-3.5">
+                  <span class="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Collector Ceiling (30+ Days)</span>
+                  <div class="text-2xl font-bold text-slate-200 mt-1" id="res-patient-price">$0.00</div>
+                  <div class="text-[11px] text-slate-400 mt-1">Maximum value realization</div>
+                </div>
+              </div>
+
+              <!-- 14-Day Sale Probability & Factors -->
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2">
+                <div class="md:col-span-5 bg-slate-950/40 rounded-xl p-3 border border-slate-800/80 flex flex-col justify-between">
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400 font-medium">14-Day Sell-Through Chance</span>
+                    <span id="res-prob-val" class="text-xs font-bold text-emerald-400">78%</span>
+                  </div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-2">
+                    <div id="res-prob-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-700" style="width: 78%"></div>
+                  </div>
+                  <div class="text-[11px] text-slate-400">Based on historical category velocity</div>
+                </div>
+
+                <div class="md:col-span-7 bg-slate-950/40 rounded-xl p-3 border border-slate-800/80">
+                  <span class="text-xs text-slate-400 font-medium block mb-1.5">TabPFN Value Drivers:</span>
+                  <div class="flex flex-wrap gap-1.5" id="res-factors-container">
+                    <!-- Badges -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chart.js Price Elasticity & Liquidity Curve -->
+              <div class="mt-4 pt-3 border-t border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="line-chart" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>TabPFN Price Elasticity & Liquidity Curve</span>
+                  </span>
+                  <span class="text-[10px] text-slate-500">Sell-through probability vs. Price point</span>
+                </div>
+                <div class="h-40 w-full relative">
+                  <canvas id="elasticity-chart"></canvas>
+                </div>
+              </div>
+
+              <!-- Financial Unit Economics Bar -->
+              <div class="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <span class="text-slate-400">Your Cost:</span>
+                    <span class="font-bold text-white ml-1" id="res-cost">$15.00</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400">Platform Fee:</span>
+                    <span class="font-bold text-slate-300 ml-1" id="res-fee">$19.50</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400">Est. Shipping:</span>
+                    <span class="font-bold text-slate-300 ml-1" id="res-shipping">$8.50</span>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                  <span class="text-slate-300 font-medium">Projected Net Profit:</span>
+                  <span class="font-extrabold text-emerald-400 text-sm" id="res-net-profit">+$102.00</span>
+                  <span class="text-[11px] text-emerald-400/80 font-bold" id="res-roi">(680% ROI)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: SerpApi Live Market Comps -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="search" class="w-4 h-4 text-amber-400"></i>
+                  <h4 class="font-bold text-sm text-white">Live Competitor Comps (SerpApi Radar)</h4>
+                </div>
+                <span class="text-xs text-slate-400" id="res-comps-engine">SerpApi Live Market Radar</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-center py-1">
+                <div class="bg-slate-800/40 p-2 rounded-lg border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase">Min Comp</span>
+                  <div class="font-bold text-slate-200 text-sm mt-0.5" id="res-comp-min">$0.00</div>
+                </div>
+                <div class="bg-slate-800/40 p-2 rounded-lg border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase">Market Average</span>
+                  <div class="font-bold text-amber-400 text-sm mt-0.5" id="res-comp-avg">$0.00</div>
+                </div>
+                <div class="bg-slate-800/40 p-2 rounded-lg border border-slate-800">
+                  <span class="text-[10px] text-slate-400 uppercase">Max Comp</span>
+                  <div class="font-bold text-slate-200 text-sm mt-0.5" id="res-comp-max">$0.00</div>
+                </div>
+              </div>
+
+              <!-- Competitor Listing Cards -->
+              <div class="space-y-2 max-h-48 overflow-y-auto pr-1" id="res-competitors-list">
+                <!-- Dynamically populated comps -->
+              </div>
+            </div>
+
+            <!-- Card 3: Google Gemma 2 Open-Weight Generated Listing Copy -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+                  <h4 class="font-bold text-sm text-white">Marketplace Copy (Google Gemma 2)</h4>
+                </div>
+                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20" id="res-gemma-badge">
+                  Google Gemma 2 Open-Weight
+                </span>
+              </div>
+
+              <!-- eBay Strict 80-Char Title -->
+              <div>
+                <div class="flex items-center justify-between mb-1 text-xs">
+                  <span class="font-semibold text-slate-300 flex items-center space-x-1">
+                    <span>eBay Search-Optimized Title</span>
+                    <span class="text-slate-500">(Strict 80 char limit)</span>
+                  </span>
+                  <div class="flex items-center space-x-2">
+                    <span id="ebay-char-count" class="font-mono text-emerald-400 text-[11px] font-bold">72 / 80</span>
+                    <button onclick="copyToClipboard('res-ebay-title', 'eBay Title Copied!')" class="copy-btn">
+                      <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                    </button>
+                  </div>
+                </div>
+                <div id="res-ebay-title" class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs sm:text-sm font-medium text-slate-100 select-all">
+                  <!-- Title -->
+                </div>
+              </div>
+
+              <!-- Etsy Storytelling Title -->
+              <div>
+                <div class="flex items-center justify-between mb-1 text-xs">
+                  <span class="font-semibold text-slate-300">Etsy / Boutique Curated Title</span>
+                  <button onclick="copyToClipboard('res-etsy-title', 'Etsy Title Copied!')" class="copy-btn">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                  </button>
+                </div>
+                <div id="res-etsy-title" class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 select-all">
+                  <!-- Etsy Title -->
+                </div>
+              </div>
+
+              <!-- Bullet Specifications -->
+              <div>
+                <div class="flex items-center justify-between mb-1 text-xs">
+                  <span class="font-semibold text-slate-300">Bullet Item Specifics</span>
+                  <button onclick="copySpecs()" class="copy-btn">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copy Specs
+                  </button>
+                </div>
+                <ul id="res-bullet-specs" class="space-y-1 text-xs text-slate-300 list-disc list-inside bg-slate-950 p-3 rounded-xl border border-slate-800">
+                  <!-- Bullet items -->
+                </ul>
+              </div>
+
+              <!-- Full Markdown Description -->
+              <div>
+                <div class="flex items-center justify-between mb-1 text-xs">
+                  <span class="font-semibold text-slate-300">Full Buyer-Protected Description (Markdown)</span>
+                  <button onclick="copyToClipboard('res-description', 'Markdown Description Copied!')" class="copy-btn">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copy Markdown
+                  </button>
+                </div>
+                <div id="res-description" class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 max-h-48 overflow-y-auto whitespace-pre-wrap select-all">
+                  <!-- Markdown -->
+                </div>
+              </div>
+
+              <!-- SEO Tags -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5 text-xs">
+                  <span class="font-semibold text-slate-300">Rank-Boosting Search Tags</span>
+                  <button onclick="copyTags()" class="copy-btn">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copy All Tags
+                  </button>
+                </div>
+                <div id="res-tags-container" class="flex flex-wrap gap-1.5">
+                  <!-- Tags -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: ElevenLabs Viral Social Video Script & Audio -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="mic" class="w-4 h-4 text-pink-400"></i>
+                  <h4 class="font-bold text-sm text-white">TikTok / Reels Viral Audio Generator (ElevenLabs)</h4>
+                </div>
+                <span class="text-xs text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20">
+                  ElevenLabs Voice AI
+                </span>
+              </div>
+
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-200">
+                <span class="text-slate-500 block text-[10px] uppercase font-bold mb-1">Generated 15-Sec Video Hook:</span>
+                <p id="res-social-hook" class="italic">"Grail alert: Just sourced this rare vintage Nike windbreaker in pristine condition. Link in bio before it sells!"</p>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div class="flex items-center space-x-2">
+                  <button id="generate-voice-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white transition-all flex items-center space-x-1.5">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                    <span>Generate Voiceover Clip</span>
+                  </button>
+                  <span id="voice-status" class="text-xs text-slate-400">Voice: Rachel (Hype Reseller)</span>
+                </div>
+                <div id="audio-player-wrapper" class="hidden">
+                  <audio id="promo-audio-player" controls class="h-8 max-w-[220px]"></audio>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Bar: Save to Inventory -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h5 class="text-sm font-bold text-white">Save to Active Inventory</h5>
+                <p class="text-xs text-slate-400">Tracks listing status, cost basis, and realized profit</p>
+              </div>
+              <button id="save-inventory-btn"
+                class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all flex items-center space-x-1.5 shadow-md shadow-emerald-500/20">
+                <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+                <span>Save to Reseller Catalog</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- View 2: Inventory Catalog View -->
+    <section id="inventory-view" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="package" class="w-6 h-6 text-emerald-400"></i>
+            <span>Reseller Inventory & Realized Profits</span>
+          </h2>
+          <p class="text-xs text-slate-400">Track active listings across eBay, Etsy, and Poshmark with profit analytics</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button id="export-csv-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700 transition-colors flex items-center space-x-1.5 shadow-sm">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+            <span>Export Catalog (CSV)</span>
+          </button>
+          <button onclick="switchView('pricing')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors flex items-center space-x-1.5">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Appraise New Item</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Inventory Portfolio Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Catalog Items</span>
+          <div class="text-2xl font-bold text-white mt-1" id="stat-total-items">0</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Total Sourced Cost</span>
+          <div class="text-2xl font-bold text-slate-300 mt-1" id="stat-total-cost">$0.00</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Total Market Value</span>
+          <div class="text-2xl font-bold text-emerald-400 mt-1" id="stat-total-value">$0.00</div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Projected Net Profit</span>
+          <div class="text-2xl font-bold text-emerald-400 mt-1" id="stat-total-profit">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+              <tr>
+                <th class="p-3.5">Item & Brand</th>
+                <th class="p-3.5">Category</th>
+                <th class="p-3.5">Cost Basis</th>
+                <th class="p-3.5">TabPFN Optimal</th>
+                <th class="p-3.5">Floor / Ceiling</th>
+                <th class="p-3.5">Net Profit</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody" class="divide-y divide-slate-800/60 text-slate-200">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+        <div id="inventory-empty-msg" class="p-8 text-center text-slate-500 text-xs">
+          No items saved in inventory yet. Appraise an item to save it here!
+        </div>
+      </div>
+    </section>
+
+    <!-- View 3: Sentry Agent Tracing & Telemetry View -->
+    <section id="telemetry-view" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="activity" class="w-6 h-6 text-purple-400"></i>
+            <span>Sentry Agent Tracing & Performance Telemetry</span>
+          </h2>
+          <p class="text-xs text-slate-400">Real-time traces capturing tool latency, token throughput, and agent pipeline steps</p>
+        </div>
+        <button onclick="refreshTraces()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center space-x-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Refresh Traces</span>
+        </button>
+      </div>
+
+      <!-- Telemetry Info Card -->
+      <div class="bg-slate-900 border border-purple-500/30 rounded-2xl p-5 shadow-xl space-y-3">
+        <div class="flex items-center space-x-2 text-xs text-purple-400 font-semibold uppercase tracking-wider">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Sentry Observability Instrumentation</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          PriceCraft AI instruments every execution step with OpenTelemetry & Sentry SDK. For each item valuation, our agent pipeline measures latency across Prior Labs TabPFN tabular inference, Google Gemma 2 copywriting token generation, and SerpApi live marketplace requests.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
+          <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Average Latency</span>
+            <span class="font-bold text-white text-sm" id="trace-avg-latency">48 ms</span>
+          </div>
+          <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">TabPFN In-Context Time</span>
+            <span class="font-bold text-blue-400 text-sm">~18 ms</span>
+          </div>
+          <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Gemma 2 Generation</span>
+            <span class="font-bold text-emerald-400 text-sm">~45 ms</span>
+          </div>
+          <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Tracing Sample Rate</span>
+            <span class="font-bold text-purple-400 text-sm">100% (Full Spans)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traces Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="p-3.5 bg-slate-950 border-b border-slate-800 font-bold text-xs text-slate-300 flex items-center justify-between">
+          <span>Live Agent Span History</span>
+          <span class="text-[10px] text-slate-500">Auto-buffered in Sentry engine</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+              <tr>
+                <th class="p-3">Timestamp</th>
+                <th class="p-3">Agent Step</th>
+                <th class="p-3">Engine / Tool</th>
+                <th class="p-3">Duration (ms)</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Span Metadata</th>
+              </tr>
+            </thead>
+            <tbody id="traces-tbody" class="divide-y divide-slate-800/60 font-mono text-[11px] text-slate-300">
+              <!-- Dynamically populated traces -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 border border-emerald-500/50 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-2xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-text">Success message</span>
+  </div>
+
+  <footer class="border-t border-slate-800/60 bg-slate-950/80 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-300">PriceCraft AI</span>
+        <span>— Hacktoberfest 2026 Open-Source AI Challenge (Week 2: Side Hustle)</span>
+      </div>
+      <div>
+        Built with Google Gemma 2, Prior Labs TabPFN-3.5, SerpApi, ElevenLabs, and Sentry.
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
