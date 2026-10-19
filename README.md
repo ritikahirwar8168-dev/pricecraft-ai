@@ -115,20 +115,6 @@ Covers health check, TabPFN valuation, Gemma copy, SerpApi comps, inventory pers
 
 ---
 
-## Deployment
-
-The production instance is live at **[https://pricecraft-ai.onrender.com](https://pricecraft-ai.onrender.com)**.
-
-This repo includes `render.yaml` (Python 3.11, health check at `/api/health`). To deploy your own copy:
-
-1. Push the repository to GitHub.
-2. In [Render](https://render.com), create a new **Blueprint** and connect the repo.
-3. Set the optional API keys in the Render dashboard (they are marked `sync: false` in the blueprint).
-
-Health endpoint: `GET /api/health`.
-
----
-
 ## Hacktoberfest 2026
 
 This project is submitted for the Week 2 Side Hustle challenge and uses:
